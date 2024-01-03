@@ -54,7 +54,7 @@ class siyuanWriter(Bot):
             elif query[1].startswith('查询'):
                 reply_msg = self.search(query[1].replace('查询', ''), context)
             else:
-                reply_msg = self.test_note(query[1], context)
+                reply_msg = self.text_note(query[1], context)
         elif query[0]  == 'image':
             reply_msg = self.image_note(query[1], context)
         # elif query[0]  == 'voice':
@@ -94,7 +94,7 @@ class siyuanWriter(Bot):
 
 
     # 定义收到文本消息的动作       
-    def test_note(self, message, context=None):
+    def text_note(self, message, context=None):
         #判断用户openid是否有权限写入笔记本
         # print(self.username)
         if context['from_user_id'] == self.username:
@@ -132,6 +132,7 @@ class siyuanWriter(Bot):
             data = response.json()
             pathp = data['data']['succMap'][f"{name}.jpg"]
             path = self.date_time()
+            print(pathp)
             data = {
                 "notebook": self.notebook,
                 "path": f"【图片】-{path}",
@@ -207,13 +208,13 @@ class siyuanWriter(Bot):
             path = self.date_time()
             location = message['location']
             scale = message['scale']
-            latitude = str(message['location_y'])
-            longitude = str(message['location_x'])
-            # scale_str = str(message['label'])
+            latitude = str(message['location_x'])
+            longitude = str(message['location_y'])
+            location_link = f"https://ditu.amap.com/regeo?lng={longitude}&lat={latitude}"
             data = {
             "notebook": self.notebook,
             "path": f"【位置】-{path}",
-            "markdown": f"经度：{longitude}\n纬度：{latitude}\n放缩倍数：{scale}\n描述：{message['label']}" #以markdown形式写入到思源笔记
+            "markdown": f"经度：{latitude}\n纬度：{longitude}\n放缩倍数：{scale}\n地点：[{message['label']}]({location_link})" #以markdown形式写入到思源笔记
             }
             response = requests.post(self.urlbase + '/api/filetree/createDocWithMd', headers=self.headers, json=data)
             result = response.json()
